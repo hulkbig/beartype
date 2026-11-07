@@ -148,7 +148,9 @@ class BeartypeValidator(metaclass=BeartypeSlottedABCMeta):
             * ``is_valid`` is either:
 
               * *Not* callable.
-              * A C-based rather than pure-Python callable.
+              * A C-based callable other than a partial exposing a signature
+                with exactly one positional parameter and no unbound required
+                keywords.
               * A pure-Python callable accepting two or more arguments.
 
             * ``is_valid_code`` is either:

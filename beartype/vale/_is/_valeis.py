@@ -310,7 +310,9 @@ class _IsFactory(_BeartypeValidatorFactoryABC):
             * This class was subscripted by one argument that either:
 
               * Is *not* callable.
-              * Is a C-based rather than pure-Python callable.
+              * Is a C-based callable other than a partial exposing a signature
+                with exactly one positional parameter and no unbound required
+                keywords.
               * Is a pure-Python callable accepting two or more arguments.
 
         See Also

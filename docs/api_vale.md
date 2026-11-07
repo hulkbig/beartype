@@ -94,6 +94,18 @@ LengthyString = Annotated[str, Is[lambda text: 4 <= len(text) <= 40]]
 
 Functional validators are caller-defined and may thus validate the internal integrity, consistency, and structure of arbitrary objects ranging from simple builtin scalars like integers and strings to complex data structures defined by third-party packages like NumPy arrays and Pandas DataFrames.
 
+`Is` also accepts `functools.partial` predicates wrapping C-based functions when Python can inspect their remaining single-argument signature:
+
+```python
+from functools import partial
+from operator import le
+
+# le(1, value) tests 1 <= value, not value <= 1.
+PositiveInt = Annotated[int, Is[partial(le, 1)]]
+```
+
+Such partials must expose exactly one remaining positional parameter and require no additional keyword-only arguments. Optional keyword-only arguments may remain. Functions without an inspectable signature are still rejected; wrap them in a one-argument Python function instead. Creating the validator inspects the signature without calling the predicate.
+
 <div id="beartype.vale.IsAttr"></div>
 
 ### IsAttr
