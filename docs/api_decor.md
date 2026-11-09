@@ -87,6 +87,29 @@ instance of str.
 
 Because `beartype` preserves the original callable as `__wrapped__`, `beartype` seamlessly integrates with other well-behaved decorators that respect that same pseudo-standard. This means that `beartype` can *usually* be listed in any arbitrary order when chained (i.e., combined) with other decorators.
 
+Standard `functools.partial` objects are also supported. `beartype` decorates the
+wrapped callable and returns a new partial with the same bound arguments and
+instance attributes. Both bound arguments and arguments supplied at call time
+are checked, along with the return value. Call-time keyword arguments can still
+override bound keyword arguments. The original partial is left unchanged.
+
+```python
+from functools import partial
+from beartype import beartype
+
+def add(first: int, second: int) -> int:
+    return first + second
+
+add_one = beartype(partial(add, 1))
+assert add_one(2) == 3
+add_one('two')  # Raises BeartypeCallHintParamViolation.
+```
+
+The returned partial retains its reduced signature rather than acquiring a new
+`__wrapped__` attribute. If the wrapped callable needs no additional checking,
+the original partial is returned instead. This support does not change the
+handling of custom subclasses of `functools.partial`.
+
 Because this is the NP-hard timeline, however, assumptions are risky. If you doubt anything, the safest approach is just to list `@beartype` as the **last** (i.e., bottommost) decorator. This:
 
 - Ensures that `beartype` is called first on the decorated callable *before* other decorators have a chance to really muck things up. Other decorators: *always the source of all your problems.*

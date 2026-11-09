@@ -14,6 +14,8 @@ This private submodule is *not* intended for importation by downstream callers.
 # ....................{ IMPORTS                            }....................
 from beartype._decor._nontype._api.external.decorclick import (
     beartype_click_command)
+from beartype._decor._nontype._api.decorstandard import (
+    beartype_func_functools_partial)
 from beartype._decor._nontype._builtin.decorbuiltindescriptor import (
     beartype_descriptor_decorator_builtin_class_or_static_method,
     beartype_descriptor_decorator_builtin_property,
@@ -32,6 +34,9 @@ MODULE_TO_TYPE_NAME_TO_BEARTYPE_DECORATOR = {
             beartype_descriptor_decorator_builtin_class_or_static_method),
         'property': (
             beartype_descriptor_decorator_builtin_property),
+    },
+    'functools': {
+        'partial': beartype_func_functools_partial,
     },
 }
 '''

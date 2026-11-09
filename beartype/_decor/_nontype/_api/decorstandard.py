@@ -21,9 +21,12 @@ from beartype._util.func.pep.utilfuncpep702 import (
     die_unless_func_pep702_deprecated,
     make_func_pep702_deprecated,
 )
+from beartype._util.func.pep.utilfuncpep484 import (
+    is_func_pep484_notypechecked)
 from beartype._util.func.utilfuncwrap import unwrap_func_once
 from collections.abc import Callable
-from functools import lru_cache
+from functools import lru_cache, partial
+from types import BuiltinFunctionType
 
 # ....................{ DECORATORS ~ contextlib            }....................
 def beartype_func_contextlib_contextmanager(
@@ -84,6 +87,49 @@ def beartype_func_contextlib_contextmanager(
     return generator_checked_contextmanager  # type: ignore[return-value]
 
 # ....................{ DECORATORS ~ functools             }....................
+def beartype_func_functools_partial(
+    pseudofunc: partial, **kwargs) -> partial:
+    '''
+    Decorate the callable wrapped by a :class:`functools.partial`, preserving
+    the arguments and instance attributes of that partial.
+
+    Type-checking the wrapped callable rather than the partial ensures that
+    both pre-bound and subsequently passed arguments are checked against the
+    original annotations. Argument binding remains the responsibility of
+    :class:`functools.partial`, including call-time keyword overrides.
+
+    All remaining keyword parameters are passed to the lower-level
+    :func:`beartype._decor.decorcore.beartype_object` decorator.
+    '''
+    assert type(pseudofunc) is partial, f'{repr(pseudofunc)} not partial.'
+
+    # Avoid circular import dependencies.
+    from beartype._decor.decorcore import beartype_object
+
+    # Respect an opt-out on the partial itself. Builtin functions and bound
+    # builtin methods have no annotations to enforce and need no wrapper.
+    if (
+        is_func_pep484_notypechecked(pseudofunc) or
+        isinstance(pseudofunc.func, BuiltinFunctionType)
+    ):
+        return pseudofunc
+
+    func_checked = beartype_object(pseudofunc.func, **kwargs)
+
+    # Preserve identity when the wrapped callable requires no new wrapper.
+    if func_checked is pseudofunc.func:
+        return pseudofunc
+
+    pseudofunc_checked = partial(
+        func_checked, *pseudofunc.args, **pseudofunc.keywords)
+
+    # Do not use update_wrapper(): adding __wrapped__ would hide the partial's
+    # reduced signature from inspect.signature(). Preserve only existing
+    # caller-defined attributes, including an explicitly supplied __wrapped__.
+    pseudofunc_checked.__dict__.update(pseudofunc.__dict__)
+    return pseudofunc_checked
+
+
 def beartype_func_functools_lru_cache(
     pseudofunc: BeartypeableT, **kwargs) -> BeartypeableT:
     '''
