@@ -184,6 +184,11 @@ def die_if_conf_kwargs_invalid(conf_kwargs: DictStrToAny) -> None:
     # Else, "claw_decor_place_type" is an enumeration member.
     #
     # If "claw_is_pep526" is *NOT* a boolean, raise an exception.
+    elif not isinstance(conf_kwargs['claw_is_pep484'], bool):
+        raise BeartypeConfParamException(
+            f'Beartype configuration parameter "claw_is_pep484" '
+            f'value {repr(conf_kwargs["claw_is_pep484"])} not boolean.'
+        )
     elif not isinstance(conf_kwargs['claw_is_pep526'], bool):
         raise BeartypeConfParamException(
             f'Beartype configuration parameter "claw_is_pep526" '

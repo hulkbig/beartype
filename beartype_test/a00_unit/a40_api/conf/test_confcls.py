@@ -63,6 +63,7 @@ def test_conf_dataclass() -> None:
         'BeartypeConf',
         'claw_decor_place_func',
         'claw_decor_place_type',
+        'claw_is_pep484',
         'claw_is_pep526',
         'claw_skip_package_names',
         'hint_overrides',
@@ -92,6 +93,7 @@ def test_conf_dataclass() -> None:
     BEAR_CONF_NONDEFAULT_KWARGS = dict(
         claw_decor_place_func=BeartypeDecorPlace.LAST,
         claw_decor_place_type=BeartypeDecorPlace.FIRST,
+        claw_is_pep484=False,
         claw_is_pep526=False,
         claw_skip_package_names=('Made_contrast_with', 'the_universe',),
         hint_overrides=BEAR_HINT_OVERRIDES_NONEMPTY,
@@ -135,6 +137,7 @@ def test_conf_dataclass() -> None:
         BeartypeConf(
             claw_decor_place_func=BeartypeDecorPlace.LAST,
             claw_decor_place_type=BeartypeDecorPlace.FIRST,
+            claw_is_pep484=False,
             claw_is_pep526=False,
             claw_skip_package_names=('Made_contrast_with', 'the_universe',),
             hint_overrides=BEAR_HINT_OVERRIDES_NONEMPTY,
@@ -165,6 +168,7 @@ def test_conf_dataclass() -> None:
             is_debug=True,
             is_color=True,
             hint_overrides=BEAR_HINT_OVERRIDES_NONEMPTY,
+            claw_is_pep484=False,
             claw_is_pep526=False,
             claw_skip_package_names=('Made_contrast_with', 'the_universe',),
             claw_decor_place_type=BeartypeDecorPlace.FIRST,
@@ -178,6 +182,7 @@ def test_conf_dataclass() -> None:
         BeartypeDecorPlace.LAST_BEFORE_DECOR_HOSTILE)
     assert BEAR_CONF_DEFAULT.claw_decor_place_type is (
         BeartypeDecorPlace.LAST)
+    assert BEAR_CONF_DEFAULT.claw_is_pep484 is True
     assert BEAR_CONF_DEFAULT.claw_is_pep526 is True
     assert BEAR_CONF_DEFAULT.claw_skip_package_names == ()
     assert BEAR_CONF_DEFAULT.hint_overrides is FROZENDICT_EMPTY
@@ -204,6 +209,7 @@ def test_conf_dataclass() -> None:
         BeartypeDecorPlace.LAST)
     assert BEAR_CONF_NONDEFAULT.claw_decor_place_type is (
         BeartypeDecorPlace.FIRST)
+    assert BEAR_CONF_NONDEFAULT.claw_is_pep484 is False
     assert BEAR_CONF_NONDEFAULT.claw_is_pep526 is False
     assert BEAR_CONF_NONDEFAULT.claw_skip_package_names == (
         'Made_contrast_with', 'the_universe',)
@@ -296,6 +302,14 @@ def test_conf_dataclass() -> None:
     # non-default fields of this configuration.
     for bear_conf_repr_substr in BEAR_CONF_REPR_SUBSTRS:
         assert bear_conf_repr_substr in BEAR_CONF_NONDEFAULT_REPR
+
+    assert BeartypeConf(claw_is_pep484=False) is BeartypeConf(claw_is_pep484=False)
+    assert BeartypeConf(claw_is_pep484=False) is not BEAR_CONF_DEFAULT
+    for invalid in ('no', None, 1):
+        with raises(BeartypeConfParamException):
+            BeartypeConf(claw_is_pep484=invalid)
+    with raises(AttributeError):
+        BEAR_CONF_DEFAULT.claw_is_pep484 = False
 
     # ....................{ FAIL ~ raise                   }....................
     # Assert that instantiating a configuration with an invalid parameter raises

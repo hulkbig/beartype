@@ -143,6 +143,8 @@ class BeartypeConf(object):
         existing chains of one or more decorators decorating user-defined
         classes to which :mod:`beartype.claw` import hooks will automatically
         inject the :func:`beartype.beartype` decorator).
+    _claw_is_pep484 : bool
+        Whether import hooks validate calls to :func:`typing.cast`.
     _claw_is_pep526 : bool
         :data:`True` only if type-checking **annotated variable assignments**
         (i.e., :pep:`526`-compliant assignments to local, global, class, and
@@ -279,6 +281,7 @@ class BeartypeConf(object):
     __slots__ = (
         '_claw_decor_place_func',
         '_claw_decor_place_type',
+        '_claw_is_pep484',
         '_claw_is_pep526',
         '_claw_skip_package_names',
         '_conf_args',
@@ -309,6 +312,7 @@ class BeartypeConf(object):
     if TYPE_CHECKING:
         _claw_decor_place_func: BeartypeDecorPlace
         _claw_decor_place_type: BeartypeDecorPlace
+        _claw_is_pep484: bool
         _claw_is_pep526: bool
         _claw_skip_package_names: CollectionStrs
         _conf_args: tuple
@@ -352,6 +356,7 @@ class BeartypeConf(object):
             BeartypeDecorPlace.LAST_BEFORE_DECOR_HOSTILE),
         claw_decor_place_type: BeartypeDecorPlace = (
             BeartypeDecorPlace.LAST),
+        claw_is_pep484: bool = True,
         claw_is_pep526: bool = True,
         claw_skip_package_names: CollectionStrs = (),
         hint_overrides: FrozenDict = FROZENDICT_EMPTY,
@@ -470,6 +475,13 @@ class BeartypeConf(object):
                @beartype  # <-- @beartype decorates first rather than last! \\o/
                class ClassyData(object):
                    integral_datum: int
+        claw_is_pep484 : bool, optional
+            Whether import hooks validate explicit and aliased calls to
+            :func:`typing.cast` and :func:`beartype.typing.cast`. Defaults to
+            :data:`True`. Set to :data:`False` to retain unchecked casts.
+            Violations follow :attr:`violation_door_type`; successful checks
+            return the original value unchanged. Arbitrary indirect aliases
+            and re-exported casts are not guaranteed to be checked.
         claw_is_pep526 : bool, optional
             :data:`True` only if implicitly type-checking **annotated variable
             assignments** (i.e., :pep:`526`-compliant assignments to local,
@@ -808,6 +820,14 @@ class BeartypeConf(object):
             * ``is_check_pep557``.
         '''
 
+        # Validate before cache lookup: integers 0 and 1 compare equal to
+        # booleans and would otherwise reuse an already cached configuration.
+        if not isinstance(claw_is_pep484, bool):
+            from beartype.roar import BeartypeConfParamException
+            raise BeartypeConfParamException(
+                f'Beartype configuration parameter "claw_is_pep484" '
+                f'value {repr(claw_is_pep484)} not boolean.')
+
         # In a non-reentrant thread lock isolated to this constructor...
         #
         # Note that this lock is potentially overkill and thus unnecessary.
@@ -866,6 +886,7 @@ class BeartypeConf(object):
             conf_args = (
                 claw_decor_place_func,
                 claw_decor_place_type,
+                claw_is_pep484,
                 claw_is_pep526,
                 claw_skip_package_names,
                 hint_overrides,
@@ -899,6 +920,7 @@ class BeartypeConf(object):
             conf_kwargs = dict(
                 claw_decor_place_func=claw_decor_place_func,
                 claw_decor_place_type=claw_decor_place_type,
+                claw_is_pep484=claw_is_pep484,
                 claw_is_pep526=claw_is_pep526,
                 claw_skip_package_names=claw_skip_package_names,
                 hint_overrides=hint_overrides,
@@ -978,6 +1000,7 @@ class BeartypeConf(object):
                 'claw_decor_place_func']
             self._claw_decor_place_type = conf_kwargs[  # pyright: ignore
                 'claw_decor_place_type']
+            self._claw_is_pep484 = conf_kwargs['claw_is_pep484']
             self._claw_is_pep526 = conf_kwargs['claw_is_pep526']  # pyright: ignore
             self._claw_skip_package_names = conf_kwargs[
                 'claw_skip_package_names']  # pyright: ignore
@@ -1276,6 +1299,15 @@ class BeartypeConf(object):
         '''
 
         return self._claw_decor_place_type
+
+
+    @property
+    def claw_is_pep484(self) -> bool:
+        '''
+        Whether import hooks validate explicitly imported :func:`typing.cast`
+        calls, including import aliases. See :meth:`__new__` for details.
+        '''
+        return self._claw_is_pep484
 
 
     @property

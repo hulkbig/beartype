@@ -60,6 +60,11 @@ class BeartypeNodeTransformerModuleMixin(object):
             That same module node.
         '''
 
+        # Collect cast imports before visiting calls: callable bodies may use
+        # imports appearing later in the module's source. Runtime identity
+        # guards, rather than this syntactic census, decide what to check.
+        self._collect_cast_imports(node)  # type: ignore[attr-defined]
+
         # 0-based index of an early child node of this parent module node
         # immediately *BEFORE* which to insert one or more statements importing
         # beartype-specific attributes, defaulting to the first child node of

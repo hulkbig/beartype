@@ -52,6 +52,37 @@ Beartype is now a tentacular cyberpunk horror like that mutant brain baby from K
 
 Beartype import hooks is a hobbit hole so deep we had to deescalate it with decrepit manga panels from *Akira*. Prepare to enter that hole.
 
+### Checking casts
+
+Import hooks validate calls to `typing.cast` (and the equivalent
+`beartype.typing.cast`) by default. For example, a hooked module's
+`cast(int, "not an integer")` raises `BeartypeDoorHintViolation`. A successful
+cast returns the original object, without copying or converting it.
+
+Supported spellings include `import typing as t; t.cast(...)`,
+`from typing import cast as checked; checked(...)`, their `beartype.typing`
+equivalents, and star imports. Imports inside functions and imports appearing
+later than a function definition are supported. A runtime identity check leaves
+unrelated functions untouched when an imported name is shadowed or reassigned.
+The callable and arguments are evaluated once, in their original order; keyword
+arguments and argument unpacking remain supported.
+
+Only call spellings identified from imports in the hooked module are checked.
+Arbitrary indirect aliases such as `checker = typing.cast; checker(...)`,
+re-exports from other modules, and dynamically obtained callables are not
+guaranteed to be checked. Unhooked modules and the original `typing.cast`
+function are unchanged.
+
+Checks use the same supported hints, configured hint overrides and sampling
+strategy as `beartype.door.die_if_unbearable`; unsupported hints, including
+context-dependent string forward references, can raise hint exceptions. Set
+`violation_door_type` to a warning category to warn and still return the original
+value. To retain unchecked casts, install the hook with
+`BeartypeConf(claw_is_pep484=False)`. `BeartypeStrategy.O0` also disables checks.
+Cast expressions still perform a small callable-selection step when disabled,
+so cached instrumented bytecode can safely be reused with a different
+configuration in a later process.
+
 ### What Is beartype_this_package()?
 
 Let's begin by outlining exactly **what** `beartype_this_package` does.

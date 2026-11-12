@@ -73,9 +73,13 @@ from beartype.door._func.doorfunc import (
 from beartype._util.hint.pep.proposal.pep695 import (
     iter_hint_pep695_unsubbed_forwardrefs as __iter_hint_pep695_unsubbed_forwardrefs_beartype__)
 
+from beartype.claw._ast._clawastcast import (
+    select_cast as __select_cast_beartype__)
+
 # ....................{ GLOBALS                            }....................
 __all__ = [
     '__beartype__',
+    '__select_cast_beartype__',
     '__claw_state_beartype__',
     '__die_if_unbearable_beartype__',
     '__iter_hint_pep695_unsubbed_forwardrefs_beartype__',
