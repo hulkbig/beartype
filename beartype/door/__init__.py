@@ -62,6 +62,15 @@ from beartype.door._cls.pep.pep484585.doorpep484585tuple import (
     TupleFixedTypeHint,
     TupleVariableTypeHint,
 )
+from beartype.door._cls.pep.pep484585.doorpep484585collections import (
+    IterableTypeHint as IterableTypeHint,
+    ContainerTypeHint as ContainerTypeHint,
+    ReversibleTypeHint as ReversibleTypeHint,
+    CollectionTypeHint as CollectionTypeHint,
+    MappingTypeHint as MappingTypeHint,
+    MutableMappingTypeHint as MutableMappingTypeHint,
+    DictTypeHint as DictTypeHint,
+)
 from beartype.door._func.doorfunc import (
     die_if_unbearable as die_if_unbearable,
     is_bearable as is_bearable,

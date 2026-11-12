@@ -622,3 +622,44 @@ True
 >>> is_subhint(subhint=tuple[bool], superhint=tuple[int])
 True
 ```
+
+## Mapping and collection comparisons
+
+Subscripted mappings expose their **key** type when compared with iterable or
+container interfaces. For example:
+
+```python
+from collections.abc import Collection, Iterable, Mapping, Reversible
+from beartype.door import TypeHint, DictTypeHint, is_subhint
+
+assert is_subhint(dict[str, int], Iterable[str])
+assert is_subhint(Mapping[str, bytes], Collection[str])
+assert not is_subhint(dict[str, int], Iterable[int])
+assert is_subhint(dict[str, int], Reversible[str])
+assert not is_subhint(Mapping[str, int], Reversible[str])
+assert isinstance(TypeHint(dict[str, int]), DictTypeHint)
+```
+
+The public wrappers follow the collection hierarchy:
+`DictTypeHint` subclasses `MutableMappingTypeHint`, which subclasses
+`MappingTypeHint`, which subclasses `CollectionTypeHint`. `CollectionTypeHint`
+subclasses both `IterableTypeHint` and `ContainerTypeHint`;
+`ReversibleTypeHint` subclasses `IterableTypeHint`. Actual comparisons always
+check the wrapped origins' inheritance as well, so a collection does not become
+a mapping merely because their key types match.
+
+`DictTypeHint` also wraps subscripted `collections.defaultdict` and
+`collections.OrderedDict`; `MutableMappingTypeHint` also wraps subscripted
+`collections.ChainMap`. Their origins remain distinct. The corresponding
+`typing` aliases have the same comparison semantics. Unsubscripted factories
+retain their existing generic wrappers and behaviour. In particular, a bare
+`dict` is not a subhint of a specifically parameterized `dict[str, int]`.
+
+Mapping-to-mapping comparisons retain DOOR's existing child-wise subhint
+semantics, including its treatment of `Any`; this feature does not introduce
+static-checker invariance for mutable mappings. It does not implement other
+parameter projections such as `Counter[K]` to `Mapping[K, int]`, or
+`Generator[Y, S, R]` to `Iterator[Y]`. Those comparisons retain their existing
+limitations. User-defined generic subclasses of mappings also retain their
+existing generic-wrapper behaviour; this change covers the standard mapping
+factories listed above, not arbitrary generic inheritance.

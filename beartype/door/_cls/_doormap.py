@@ -32,6 +32,15 @@ from beartype.door._cls.pep.pep484585.doorpep484585tuple import (
     TupleFixedTypeHint,
     TupleVariableTypeHint,
 )
+from beartype.door._cls.pep.pep484585.doorpep484585collections import (
+    IterableTypeHint,
+    ContainerTypeHint,
+    ReversibleTypeHint,
+    CollectionTypeHint,
+    MappingTypeHint,
+    MutableMappingTypeHint,
+    DictTypeHint,
+)
 from beartype.roar import (
     BeartypeDoorNonpepException,
     # BeartypeDoorPepUnsupportedException,
@@ -39,6 +48,16 @@ from beartype.roar import (
 from beartype._data.typing.datatypingport import Hint
 from beartype._data.hint.sign.datahintsigncls import HintSign
 from beartype._data.hint.sign.datahintsigns import (
+    HintSignIterable,
+    HintSignContainer,
+    HintSignReversible,
+    HintSignCollection,
+    HintSignMapping,
+    HintSignMutableMapping,
+    HintSignDict,
+    HintSignDefaultDict,
+    HintSignOrderedDict,
+    HintSignChainMap,
     HintSignAnnotated,
     HintSignAny,
     HintSignCallable,
@@ -150,6 +169,16 @@ def get_typehint_subclass(hint: Hint) -> type[TypeHint]:
 # ....................{ PRIVATE ~ globals                  }....................
 # Further initialized below by the _init() function.
 _HINT_SIGN_TO_TYPEHINT_SUBTYPE: dict[HintSign, type[TypeHint]] = {
+    HintSignIterable: IterableTypeHint,
+    HintSignContainer: ContainerTypeHint,
+    HintSignReversible: ReversibleTypeHint,
+    HintSignCollection: CollectionTypeHint,
+    HintSignMapping: MappingTypeHint,
+    HintSignMutableMapping: MutableMappingTypeHint,
+    HintSignDict: DictTypeHint,
+    HintSignDefaultDict: DictTypeHint,
+    HintSignOrderedDict: DictTypeHint,
+    HintSignChainMap: MutableMappingTypeHint,
     HintSignAnnotated:                AnnotatedTypeHint,
     HintSignAny:                      AnyTypeHint,
     HintSignCallable:                 CallableTypeHint,
@@ -169,6 +198,13 @@ to the :class:`.TypeHint` subclass handling those hints.
 
 TYPEHINT_SUBTYPES_SUBSCRIPTED_CATCHALL = frozenset((
     SubscriptedTypeHint,
+    IterableTypeHint,
+    ContainerTypeHint,
+    ReversibleTypeHint,
+    CollectionTypeHint,
+    MappingTypeHint,
+    MutableMappingTypeHint,
+    DictTypeHint,
     TupleVariableTypeHint,
 ))
 '''
